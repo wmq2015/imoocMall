@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <script src="../node_modules/vue/dist/vue.js"></script>
+    <script src="../node_modules/axios/dist/axios.js"></script>
+</head>
+<body>
+    <div id="app" class="container">
+        <h1>axios插件详解</h1>
+        <a href="javascript:;" class="btn btn-primary" @click="get">Get请求</a>
+        <a href="javascript:;" class="btn btn-primary" @click="post">Post请求</a>
+        <a href="javascript:;" class="btn btn-primary" @click="http">Http请求</a>
+        <div>
+            <span>{{ msg }}</span>
+        </div>
+    </div>
+    <script>
+        new Vue({
+            el:'#app',
+            data: {
+                msg: ''
+            },
+            mounted: function () {
+                axios.interceptors.request.use(config=>{
+                    console.log(config)
+                    console.log('request init.')
+                    return config
+                })
+                axios.interceptors.response.use(response=>{
+                    console.log(response)
+                    console.log('response init.')
+                    return response
+                })
+            },
+            methods:{
+                get: function () {
+                    axios.get('../package.json',{
+                       params:{
+                           userId: '999'
+                       },
+                       headers:{
+                           token: 'get-test'
+                       }
+                    }).then(res=>{
+                        this.msg = res.data
+                    }).catch(error=>{
+                        console.log('Get error: ' + error)
+                    })
+                },
+                post: function () {
+                    axios.post('../package.json',{
+                        userId: '666'
+                    },{
+                        headers: {
+                            token: 'post-test'
+                        }
+                    }).then(res=>{
+                        this.msg = res.data
+                    }).catch(error=>{
+                        console.log('Post error: ' + error)
+                    })
+                },
+                http: function () {
+                    axios({
+                        url: '../package.json',
+                        method: 'POST',
+                        headers: {
+                            token: 'http-test'
+                        },
+                        params: {
+                            userId: 'useGET'
+                        },
+                        data: {
+                            userId: 'usePOST'
+                        }
+                    }).then(res=>{
+                        this.msg = res.data
+                    }).catch(error=>{
+                        console.log('Http error: ' + error)
+                    })
+                }
+            }
+        })
+    </script>
+</body>
+</html>
