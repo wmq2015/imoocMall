@@ -38,49 +38,15 @@
                     <div class="accessory-list-wrap">
                         <div class="accessory-list col-4">
                             <ul>
-                                <li>
+                                <li v-for="item in goodsList">
                                     <div class="pic">
-                                        <a href="#"><img src="/static/1.jpg" alt=""></a>
+                                        <a href="javascript:;">
+                                            <img v-bind:src="'/static/'+item.productImage">
+                                        </a>
                                     </div>
                                     <div class="main">
-                                        <div class="name">XX</div>
-                                        <div class="price">999</div>
-                                        <div class="btn-area">
-                                            <a href="javascript:;" class="btn btn--m">加入购物车</a>
-                                        </div>
-                                    </div>
-                                </li>
-                                <li>
-                                    <div class="pic">
-                                        <a href="#"><img src="/static/2.jpg" alt=""></a>
-                                    </div>
-                                    <div class="main">
-                                        <div class="name">XX</div>
-                                        <div class="price">1000</div>
-                                        <div class="btn-area">
-                                            <a href="javascript:;" class="btn btn--m">加入购物车</a>
-                                        </div>
-                                    </div>
-                                </li>
-                                <li>
-                                    <div class="pic">
-                                        <a href="#"><img src="/static/3.jpg" alt=""></a>
-                                    </div>
-                                    <div class="main">
-                                        <div class="name">XX</div>
-                                        <div class="price">500</div>
-                                        <div class="btn-area">
-                                            <a href="javascript:;" class="btn btn--m">加入购物车</a>
-                                        </div>
-                                    </div>
-                                </li>
-                                <li>
-                                    <div class="pic">
-                                        <a href="#"><img src="/static/4.jpg" alt=""></a>
-                                    </div>
-                                    <div class="main">
-                                        <div class="name">XX</div>
-                                        <div class="price">2499</div>
+                                        <div class="name" v-html="item.productName"></div>
+                                        <div class="price" v-html="item.salePrice"></div>
                                         <div class="btn-area">
                                             <a href="javascript:;" class="btn btn--m">加入购物车</a>
                                         </div>
@@ -99,15 +65,26 @@
     import './../assets/css/base.css'
     import './../assets/css/login.css'
     import './../assets/css/product.css'
-    import NavHeader from './../components/NavHeader.vue'
-    import NavBread from '@/components/NavBread.vue'
-    import NavFooter from '@/components/NavFooter.vue'
+    import NavHeader from './../components/NavHeader'
+    import NavBread from '@/components/NavBread'
+    import NavFooter from '@/components/NavFooter'
+    import axios from 'axios'
     export default {
 
         data() {
             return {
-                msg: 'hello vue'
+                goodsList: []
             }
+        },
+        mounted(){
+            axios.get('/goods').then((response)=>{
+                let res = response.data;
+                if(res.status == '0'){
+                    this.goodsList = res.result.list;
+                }else{
+                    goodsList = [];
+                }
+            })
         },
         components: {
             NavHeader,

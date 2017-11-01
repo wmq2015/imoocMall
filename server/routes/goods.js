@@ -3,7 +3,7 @@ var router = express.Router();
 var mongoose = require('mongoose');
 var Goods = require('../models/goods');
 
-mongoose.connect('mongodb://127.0.0.1:27017/db_demo', {
+mongoose.connect('mongodb://127.0.0.1:27017/dumall', {
     useMongoClient: true
 })
 mongoose.connection.on('connected',function(){
@@ -17,6 +17,22 @@ mongoose.connection.on('disconnected', function () {
 });
 
 router.get('/',function (req,res,next) {
-    res.send('hello,goods list...')
+    Goods.find({},function (err,doc) {
+        if(err){
+            res.json({
+                status: '1',
+                msg: err.message
+            });
+        }else{
+            res.json({
+                status: '0',
+                msg: '',
+                result:{
+                    count: doc.length,
+                    list: doc
+                }
+            })
+        }
+    })
 });
 module.exports = router;

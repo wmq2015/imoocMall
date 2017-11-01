@@ -7,8 +7,15 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Program",
+            "name": "Node",
             "program": "${workspaceFolder}\\build\\dev-server.js"
+        },
+        { 
+            "type": "chrome", 
+            "request": "launch", 
+            "name": "Chrome",
+            "url": "http://localhost:4200", 
+            "webRoot": "${workspaceRoot}" 
         }
     ]
 }
