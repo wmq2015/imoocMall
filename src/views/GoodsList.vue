@@ -10,7 +10,12 @@
                 <div class="filter-nav">
                     <span class="sortby">Sort by:</span>
                     <a href="javascript:void(0)" class="default cur">Default</a>
-                    <a href="javascript:void(0)" class="price">Price <svg class="icon icon-arrow-short"><use xlink:href="#icon-arrow-short"></use></svg></a>
+                    <a @click="sortGoods" href="javascript:void(0)" class="price">
+                        Price 
+                        <svg class="icon icon-arrow-short">
+                            <use xlink:href="#icon-arrow-short"></use>
+                        </svg>
+                    </a>
                     <a href="javascript:void(0)" class="filterby stopPop">Filter by</a>
                 </div>
                 <div class="accessory-result">
@@ -18,18 +23,18 @@
                     <div class="filter stopPop" id="filter">
                         <dl class="filter-price">
                             <dt>Price:</dt>
-                            <dd><a href="javascript:void(0)">All</a></dd>
+                            <dd><a href="javascript:void(0)" @click='setPriceFilter'>All</a></dd>
                             <dd>
-                                <a href="javascript:void(0)">0 - 100</a>
+                                <a href="javascript:void(0)" @click='setPriceFilter'>0 - 100</a>
                             </dd>
                             <dd>
-                                <a href="javascript:void(0)">100 - 500</a>
+                                <a href="javascript:void(0)" @click='setPriceFilter'>100 - 500</a>
                             </dd>
                             <dd>
-                                <a href="javascript:void(0)">500 - 1000</a>
+                                <a href="javascript:void(0)" @click='setPriceFilter'>500 - 1000</a>
                             </dd>
                             <dd>
-                                <a href="javascript:void(0)">1000 - 2000</a>
+                                <a href="javascript:void(0)" @click='setPriceFilter'>1000 - 2000</a>
                             </dd>
                         </dl>
                     </div>
@@ -53,6 +58,9 @@
                                     </div>
                                 </li>
                             </ul>
+                            <div v-infinite-scroll="loadMore" infinite-scroll-disabled="busy" infinite-scroll-distance="30">
+                                加载中。。。
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -70,26 +78,71 @@
     import NavFooter from '@/components/NavFooter'
     import axios from 'axios'
     export default {
-
         data() {
             return {
-                goodsList: []
+                goodsList: [],
+                sortFlag: true,
+                page: 1,
+                pageSize: 8,
+                busy: true,
+                priceLevel: 'all'
+                 
             }
         },
         mounted(){
-            axios.get('/goods').then((response)=>{
-                let res = response.data;
-                if(res.status == '0'){
-                    this.goodsList = res.result.list;
-                }else{
-                    goodsList = [];
-                }
-            })
+            this.getGoodsList();
         },
         components: {
             NavHeader,
             NavBread,
             NavFooter
+        },
+        methods:{
+            getGoodsList(flag){
+                let param = {
+                    page: this.page,
+                    pageSize: this.pageSize,
+                    sort: this.sortFlag ? 1 : -1,
+                    priceLevel: this.priceLevel
+                };
+                axios.get('/goods',{
+                    params: param
+                }).then((response)=>{
+                    let res = response.data;
+                    if(res.status == '0'){
+                        if(flag){
+                            this.goodsList = this.goodsList.concat(res.result.list);
+                            if(res.result.count==0){
+                                this.busy = true;
+                            }else{
+                                this.busy = false;
+                            }
+                        }else{
+                            this.goodsList = res.result.list;
+                            this.busy = false;
+                        }
+                    }else{
+                        goodsList = [];
+                    }
+                })
+            },
+            sortGoods(){
+                this.sortFlag = !this.sortFlag;
+                this.page = 1;
+                this.getGoodsList();
+            },
+            setPriceFilter(index){
+                this.priceLevel = index;
+                this.page = 1;
+                this.getGoodsList();
+            },
+            loadMore(){
+                this.busy = true;
+                setTimeout(() => {
+                    this.page ++
+                    this.getGoodsList(true);
+                }, 500);
+            }
         }
     }
 </script>

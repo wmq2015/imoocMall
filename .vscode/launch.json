@@ -7,6 +7,12 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "Express",
+            "program": "${workspaceFolder}/server/bin/www"
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "Node",
             "program": "${workspaceFolder}\\build\\dev-server.js"
         },
@@ -14,7 +20,7 @@
             "type": "chrome", 
             "request": "launch", 
             "name": "Chrome",
-            "url": "http://localhost:4200", 
+            "url": "http://localhost:8090", 
             "webRoot": "${workspaceRoot}" 
         }
     ]
