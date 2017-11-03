@@ -16,25 +16,18 @@
                             <use xlink:href="#icon-arrow-short"></use>
                         </svg>
                     </a>
-                    <a href="javascript:void(0)" class="filterby stopPop">Filter by</a>
+                    <a href="javascript:void(0)" class="filterby stopPop" @click="showFilterShop">Filter by</a>
                 </div>
                 <div class="accessory-result">
                     <!-- filter -->
-                    <div class="filter stopPop" id="filter">
+                    <div class="filter stopPop" id="filter" :class="{'filterby-show': filterBy}">
                         <dl class="filter-price">
                             <dt>Price:</dt>
-                            <dd><a href="javascript:void(0)" @click='setPriceFilter'>All</a></dd>
                             <dd>
-                                <a href="javascript:void(0)" @click='setPriceFilter'>0 - 100</a>
+                                <a href="javascript:void(0)" :class="{'cur': priceChecked=='all'}" @click="setPriceFilter('all')">All</a>
                             </dd>
-                            <dd>
-                                <a href="javascript:void(0)" @click='setPriceFilter'>100 - 500</a>
-                            </dd>
-                            <dd>
-                                <a href="javascript:void(0)" @click='setPriceFilter'>500 - 1000</a>
-                            </dd>
-                            <dd>
-                                <a href="javascript:void(0)" @click='setPriceFilter'>1000 - 2000</a>
+                            <dd v-for="(price,index) in priceFilter" :key="index">
+                                <a href="javascript:void(0)" :class="{'cur': priceChecked==index}" @click="setPriceFilter(index)">{{price.startPrice}} - {{price.endPrice}}</a>
                             </dd>
                         </dl>
                     </div>
@@ -43,10 +36,10 @@
                     <div class="accessory-list-wrap">
                         <div class="accessory-list col-4">
                             <ul>
-                                <li v-for="item in goodsList">
+                                <li v-for="(item,index) in goodsList" :key="index">
                                     <div class="pic">
                                         <a href="javascript:;">
-                                            <img v-bind:src="'/static/'+item.productImage">
+                                            <img v-lazy="'/static/'+item.productImage" alt="">
                                         </a>
                                     </div>
                                     <div class="main">
@@ -58,17 +51,26 @@
                                     </div>
                                 </li>
                             </ul>
-                            <div v-infinite-scroll="loadMore" infinite-scroll-disabled="busy" infinite-scroll-distance="30">
-                                加载中。。。
+                            <div class="load-more" v-infinite-scroll="loadMore" infinite-scroll-disabled="busy" infinite-scroll-distance="30">
+                                <img src="./../assets/loading-spinning-bubbles.svg" alt="" v-show="loading">
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        <div class="md-overlay" v-show="overLayFlag" @click="closePop"></div>
         <nav-footer></nav-footer>
     </div>
 </template>
+<style>
+    .load-more{
+        height: 100px;
+        line-height: 100px;
+        text-align: center
+    }
+</style>
+
 <script>
     import './../assets/css/base.css'
     import './../assets/css/login.css'
@@ -81,12 +83,33 @@
         data() {
             return {
                 goodsList: [],
+                priceChecked: 'all',
                 sortFlag: true,
                 page: 1,
                 pageSize: 8,
                 busy: true,
-                priceLevel: 'all'
-                 
+                loading: false,
+                priceLevel: 'all',
+                filterBy: false,
+                overLayFlag: false ,
+                priceFilter:[
+                    {
+                        startPrice: '0.00',
+                        endPrice: '100.00'
+                    },
+                    {
+                        startPrice: '100.00',
+                        endPrice: '500.00'
+                    },
+                    {
+                        startPrice: '500.00',
+                        endPrice: '1000.00'
+                    },
+                    {
+                        startPrice: '1000.00',
+                        endPrice: '5000.00'
+                    }
+                ]
             }
         },
         mounted(){
@@ -98,6 +121,14 @@
             NavFooter
         },
         methods:{
+            showFilterShop(){
+                this.filterBy = true;
+                this.overLayFlag = true;
+            },
+            closePop(){
+                this.filterBy = false;
+                this.overLayFlag = false;
+            },
             getGoodsList(flag){
                 let param = {
                     page: this.page,
@@ -105,10 +136,12 @@
                     sort: this.sortFlag ? 1 : -1,
                     priceLevel: this.priceLevel
                 };
+                this.loading = true;
                 axios.get('/goods',{
                     params: param
                 }).then((response)=>{
                     let res = response.data;
+                    this.loading = false;
                     if(res.status == '0'){
                         if(flag){
                             this.goodsList = this.goodsList.concat(res.result.list);
@@ -132,6 +165,8 @@
                 this.getGoodsList();
             },
             setPriceFilter(index){
+                this.priceChecked = index;
+                this.closePop();
                 this.priceLevel = index;
                 this.page = 1;
                 this.getGoodsList();
