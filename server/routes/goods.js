@@ -4,7 +4,7 @@ var mongoose = require('mongoose');
 var Goods = require('../models/goods');
 
 mongoose.connect('mongodb://127.0.0.1:27017/dumall', {
-    useMongoClient: true
+    useMongoClient: true //新版本需要加上的属性
 })
 mongoose.connection.on('connected',function(){
     console.log('MongoDB connected success.')
@@ -39,7 +39,7 @@ router.get('/list',function (req,res,next) {
             }
         }
     }
-    
+
     let goodsModel = Goods.find(params).skip(skip).limit(pageSize);
     goodsModel.sort({'salePrice': sort});
     goodsModel.exec({},function (err,doc) {
@@ -65,7 +65,7 @@ router.get('/list',function (req,res,next) {
 router.post("/addCart", function (req, res, next) {
     var userId = '100000077', productId = req.body.productId;
     var User = require('../models/user');
-    
+
     User.findOne({ userId: userId },function (err, userDoc) {
         if(err){
             res.json({
@@ -95,7 +95,7 @@ router.post("/addCart", function (req, res, next) {
                                 msg: '',
                                 result: 'suc'
                             })
-                        } 
+                        }
                     })
                 }else{
                     Goods.findOne({ productId: productId },function (err1, doc) {
@@ -121,13 +121,13 @@ router.post("/addCart", function (req, res, next) {
                                             msg: '',
                                             result: 'suc'
                                         })
-                                    } 
+                                    }
                                 })
                             }
                         }
                     })
                 }
-                
+
             }
         }
     })

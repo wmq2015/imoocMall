@@ -2,7 +2,7 @@
     <div>
         <nav-header></nav-header>
         <nav-bread>
-            <span slot="My Cart">My Cart</span>
+            <span>My Cart</span>
         </nav-bread>
         <svg style="position: absolute; width: 0; height: 0; overflow: hidden;" version="1.1"
              xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -76,13 +76,13 @@
                                     </div>
                                 </div>
                                 <div class="cart-tab-2">
-                                    <div class="item-price" v-text="item.salePrice"></div>
+                                    <div class="item-price">{{ item.salePrice | currency('$') }}</div>
                                 </div>
                                 <div class="cart-tab-3">
                                     <div class="item-quantity">
                                         <div class="select-self select-self-open">
                                             <div class="select-self-area">
-                                                <a class="input-sub" @click="editCart('minu',item)">-</a>
+                                                <a class="input-sub" @click="editCart('minus',item)">-</a>
                                                 <span class="select-ipt" v-text="item.productNum"></span>
                                                 <a class="input-add" @click="editCart('add',item)">+</a>
                                             </div>
@@ -90,7 +90,7 @@
                                     </div>
                                 </div>
                                 <div class="cart-tab-4">
-                                    <div class="item-price-total" v-text="item.salePrice*item.productNum">100</div>
+                                    <div class="item-price-total">{{ item.salePrice*item.productNum | currency('$') }}</div>
                                 </div>
                                 <div class="cart-tab-5">
                                     <div class="cart-item-opration">
@@ -109,8 +109,8 @@
                     <div class="cart-foot-inner">
                         <div class="cart-foot-l">
                             <div class="item-all-check">
-                                <a href="javascipt:;">
-                                    <span class="checkbox-btn item-check-btn">
+                                <a href="javascipt:;" @click="toggleCheckAll">
+                                    <span class="checkbox-btn item-check-btn" :class="{'check': checkAllFlag?checkAllFlag:false}">
                                         <svg class="icon icon-ok"><use xlink:href="#icon-ok"/></svg>
                                     </span>
                                     <span>Select all</span>
@@ -119,10 +119,10 @@
                         </div>
                         <div class="cart-foot-r">
                             <div class="item-total">
-                                Item total: <span class="total-price">500</span>
+                                Item total: <span class="total-price">{{ totalPrice | currency('$') }}</span>
                             </div>
                             <div class="btn-wrap">
-                                <a class="btn btn--red">Checkout</a>
+                                <a class="btn btn--red" :class="{'btn--dis': checkedCount==0}" @click="checkOut">Checkout</a>
                             </div>
                         </div>
                     </div>
@@ -182,6 +182,29 @@
         mounted(){
             this.init();
         },
+        computed:{
+            checkAllFlag(){
+                return this.checkedCount == this.cartList.length;
+            },
+            checkedCount(){
+                let i = 0;
+                this.cartList.forEach((item)=>{
+                    if(item.checked == '1'){
+                        i++;
+                    }
+                })
+                return i;
+            },
+            totalPrice(){
+                let money = 0;
+                this.cartList.forEach((item)=>{
+                    if(item.checked == '1'){
+                        money += parseFloat(item.salePrice)*parseInt(item.productNum);
+                    }
+                })
+                return money
+            }
+        },
         components:{
             NavHeader,
             NavBread,
@@ -231,7 +254,27 @@
                 }).then((response)=>{
                     let res = response.data;
                 })
-
+            },
+            toggleCheckAll(){
+                let flag = !this.checkAllFlag;
+                this.cartList.forEach((item)=>{
+                    item.checked = flag?'1':'0';
+                })
+                axios.post('/users/editCheckAll',{
+                    checkAll: flag
+                }).then((response)=>{
+                    let res = response.data;
+                    if(res.status=='0'){
+                        console.log('select all update success')
+                    }
+                })
+            },
+            checkOut(){
+                if(this.checkedCount > 0){
+                    this.$router.push({
+                        path: '/address'
+                    });
+                }
             }
         }
     }
